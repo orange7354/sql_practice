@@ -43,6 +43,29 @@ SELECT
     END AS '成績'
 FROM Students s1;
 
+-- 各学生の点数がその学生の所属学科の平均点数と比較してどのように位置付けられるかを判断するクエリ
+SELECT 
+    s.student_id,
+    s.name,
+    s.department,
+    s.score,
+    CASE 
+        WHEN s.score > d.avg_score THEN '平均以上'
+        WHEN s.score < d.avg_score THEN '平均未満'
+        ELSE '平均'
+    END AS 成績
+FROM 
+    Students s
+INNER JOIN (
+    -- 各学科の平均点数を計算するサブクエリ
+    SELECT 
+        department,
+        AVG(score) AS avg_score
+    FROM 
+        Students
+    GROUP BY 
+        department
+) d ON s.department = d.department;
 
 
 --2 
@@ -51,3 +74,59 @@ SELECT
     SUM(CASE WHEN score >= 80 THEN 1 ELSE 0 END) AS '合格者数'
 FROM students
 GROUP BY department;
+
+
+
+
+CREATE TABLE StudentClub (
+    std_id INTEGER,
+    club_id INTEGER,
+    club_name VARCHAR(32),
+    main_club_flg CHAR(1),
+    PRIMARY KEY (std_id, club_id)
+);
+
+INSERT INTO StudentClub VALUES
+    (100, 1, '野球', 'Y'),
+    (100, 2, '吹奏楽', 'N'),
+    (200, 2, '吹奏楽', 'N'),
+    (200, 3, 'バドミントン', 'Y'),
+    (200, 4, 'サッカー', 'N'),
+    (300, 4, 'サッカー', 'N'),
+    (400, 5, '水泳', 'N'),
+    (500, 6, '囲碁', 'N'),
+    (600, 1, '野球', 'N'),
+    (600, 7, 'テニス', 'Y'),
+    (700, 8, 'バスケットボール', 'Y'),
+    (800, 8, 'バスケットボール', 'N'),
+    (900, 9, '卓球', 'Y'),
+    (1000, 10, '将棋', 'N');
+
+
+--1
+--  各クラブについて、「男子部員数」と「女子部員数」の列を表示してください。
+-- 学生のIDが偶数の場合は男子、奇数の場合は女子とみなします。
+--  クラブに所属している学生がいない場合は、0を表示してください。
+-- 
+-- 2
+-- 各クラブについて、「部員数」と「主な活動をしている部員の割合」の列を表示してください。
+-- 「主な活動をしている部員の割合」は、そのクラブを主なクラブとしている部員の数を全部員数で割った値です。
+-- 割合は、パーセント形式（例：50%）で表示してください。
+
+
+
+
+
+
+
+
+
+
+-- 解答
+SELECT
+    club_id,
+    club_name,
+    SUM(CASE WHEN std_id % 2 = 0 THEN 1 ELSE 0 END) AS male_count,
+    SUM(CASE WHEN std_id % 2 = 1 THEN 1 ELSE 0 END) AS female_count
+FROM StudentClub
+GROUP BY club_id, club_name;
