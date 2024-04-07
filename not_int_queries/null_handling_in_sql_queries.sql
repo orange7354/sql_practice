@@ -40,17 +40,82 @@ SELECT
     id,
     name
 FROM customers
-WHERE id NOT IN (
-    SELECT customer_id
-    FROM orders
-);
+WHERE id NOT IN ( SELECT customer_id FROM orders );
+
+-- サブクエリ実行して顧客IDを取得する
+SELECT
+    id,
+    name
+FROM customers
+WHERE id NOT IN ( 1, 2, 3, 4, NULL);
+
+-- NOT IN をNOTとINに分解する
+SELECT
+    id,
+    name
+FROM customers
+WHERE NOT id IN( 1, 2, 3, 4, NULL);
+
+-- IN述語をORで同値変換
+
+SELECT
+    id,
+    name
+FROM customers
+WHERE NOT ( (id = 1) OR (id = 2) OR (id = 3) OR (id = 4) OR (id = NULL) );
+
+-- ド・モルガンの法則を適用し同値変換
+SELECT
+    id,
+    name
+FROM customers
+WHERE NOT ( id = 1 ) AND NOT ( id = 2 ) AND NOT ( id = 3 ) AND NOT ( id = 4 ) AND NOT ( id = NULL );
+
+
+-- NOTと=を<>で同値変換
+SELECT
+    id,
+    name
+FROM customers
+WHERE (id <> 1) AND (id <> 2) AND (id <> 3) AND (id <> 4) AND (id <> NULL);
+
+-- NULLに<>を適用するとunknownになる
+SELECT
+    id,
+    name
+FROM customers
+WHERE (id <> 1) AND (id <> 2) AND (id <> 3) AND (id <> 4) AND unknown;
+
+
 
 -- NOT EXISTS を使用した場合
-
 SELECT *
 FROM customers c
 WHERE NOT EXISTS (
-    SELECT 1
+    SELECT *
     FROM orders o
     WHERE c.id = o.customer_id
 );
+
+-- サブクエリでNULL比較を行う
+SELECT *
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT *
+    FROM orders o
+    WHERE c.id = NULL
+);
+
+-- NULLに=を適用するとunknownになる
+SELECT *
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT *
+    FROM orders o
+    WHERE unknown
+);
+
+-- サブクエリが結果を返さない場合、反対にNOT EXISTSはTRUEとなる
+SELECT *
+FROM customers c
+WHERE TRUE;
